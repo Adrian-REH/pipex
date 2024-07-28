@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/28 23:58:12 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/07/29 00:40:56 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ static int	do_exec(char *line, char **env)
 
 	command = ft_split(line, ' ');
 	if (!command)
-		(ft_print_error("Memory error: ", 1, ""));
+		(perror("Memory error: "));
 	if (access(command[0], F_OK | X_OK) == 0)
 	{
 		if (execve(command[0], command, env) == -1)
-			return (ft_free_p2(command), perror("execve"), -1);
+			return (ft_free_p2(command), -1);
 	}
 	else
 	{
@@ -54,9 +54,7 @@ static int	first_exec(char **av, int *p_fd, char **env)
 		close(p_fd[WRITE]);
 		close(fd);
 		if (do_exec(av[2], env) == -1)
-		{
 			ft_print_error("command not found: ", 127, av[2]);
-		}
 	}
 	return (pid);
 }
@@ -80,9 +78,7 @@ static pid_t	second_exec(char **av, int *p_fd, char **env)
 		close(p_fd[READ]);
 		close(fd);
 		if (do_exec(av[3], env) == -1)
-		{
 			ft_print_error("command not found: ", 127, av[3]);
-		}
 	}
 	return (pid);
 }
@@ -102,8 +98,12 @@ int	main(int argc, char **av, char **env)
 	close(p_fd[0]);
 	close(p_fd[1]);
 	waitpid(pids[0], &status, 0);
+	if (WEXITSTATUS(status) != 0)
+		exit(WEXITSTATUS(status));
 	waitpid(pids[1], &status, 0);
-	if (WEXITSTATUS(status) == 127)
-		exit(127);
+	if (WEXITSTATUS(status) != 0)
+		exit(WEXITSTATUS(status));
+	close(p_fd[0]);
+	close(p_fd[1]);
 	return (0);
 }

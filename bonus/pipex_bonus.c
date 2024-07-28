@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/29 00:13:13 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/07/29 00:42:22 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,7 @@ void	first_process(char *argv[], int m_pipe[2], char *envp[])
 		close(m_pipe[READ]);
 		infile = open_file(argv[1], STDIN_FILENO);
 		if (infile == -1)
-			(close(m_pipe[WRITE]), exit(0));
+			(close(m_pipe[WRITE]), exit(1));
 		if (dup2(infile, STDIN_FILENO) == -1)
 			(close(infile), ft_print_error("pipe", 0, ""));
 		if (dup2(m_pipe[WRITE], STDOUT_FILENO) == -1)
