@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/28 14:15:25 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/07/28 23:58:12 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,21 +45,20 @@ static int	first_exec(char **av, int *p_fd, char **env)
 		(perror("fork"), exit(1));
 	else if (pid == 0)
 	{
-		close(p_fd[WRITE]);
+		close(p_fd[READ]);
 		fd = open_file(av[1], STDIN_FILENO);
 		if (dup2(fd, STDIN_FILENO) == -1)
 			(close(fd), exit(1));
-		if (dup2(p_fd[READ], STDOUT_FILENO) == -1)
+		if (dup2(p_fd[WRITE], STDOUT_FILENO) == -1)
 			return (perror("dup2"), close(fd), close(p_fd[READ]), -1);
-		close(p_fd[READ]);
+		close(p_fd[WRITE]);
 		close(fd);
 		if (do_exec(av[2], env) == -1)
 		{
-			(close(p_fd[READ]), close(fd));
 			ft_print_error("command not found: ", 127, av[2]);
 		}
 	}
-	return (close(p_fd[READ]), pid);
+	return (pid);
 }
 
 static pid_t	second_exec(char **av, int *p_fd, char **env)
@@ -82,11 +81,10 @@ static pid_t	second_exec(char **av, int *p_fd, char **env)
 		close(fd);
 		if (do_exec(av[3], env) == -1)
 		{
-			(close(p_fd[READ]), close(fd));
 			ft_print_error("command not found: ", 127, av[3]);
 		}
 	}
-	return (close(p_fd[READ]), pid);
+	return (pid);
 }
 
 int	main(int argc, char **av, char **env)

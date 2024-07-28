@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/28 14:17:27 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/07/29 00:13:13 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,8 +90,8 @@ void	finaly_process(int *m_fd, char **av, int argc, char **env)
 	while (argc-- - 1 > 0)
 	{
 		waitpid(-1, &status, 0);
-		if (WEXITSTATUS(status) == 127)
-			exit(127);
+		if (WEXITSTATUS(status) != 0)
+			exit(WEXITSTATUS(status));
 	}
 }
 
@@ -117,7 +117,6 @@ void	first_process(char *argv[], int m_pipe[2], char *envp[])
 		if (exec_cmd(argv[2], envp) == -1)
 			(ft_print_error("command not found: ", 127, argv[2]));
 	}
-	(close(m_pipe[WRITE]));
 }
 
 int	main(int argc, char **av, char **env)
@@ -141,4 +140,6 @@ int	main(int argc, char **av, char **env)
 	while (i < (argc - 2))
 		i += ((redirect_and_exec(m_pipe, av[i], env)), 1);
 	finaly_process(m_pipe, av, argc, env);
+	close(m_pipe[0]);
+	close(m_pipe[1]);
 }
