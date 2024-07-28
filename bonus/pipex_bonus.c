@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/29 00:51:52 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/07/29 01:06:19 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void	finaly_process(int *m_fd, char **av, int argc, char **env)
 	while (argc-- - 1 > 0)
 	{
 		waitpid(-1, &status, 0);
-		if (WEXITSTATUS(status) != 0)
+		if (WEXITSTATUS(status) == 127)
 			exit(WEXITSTATUS(status));
 	}
 }
