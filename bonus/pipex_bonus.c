@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/29 00:42:22 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/07/29 00:51:52 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ pid_t	here_doc(char *limiter, int *m_pipe)
 			{
 				free(p_heredoc);
 				close(m_pipe[WRITE]);
-				exit(0);
+				exit(1);
 			}
 			(ft_putstr_fd(p_heredoc, m_pipe[1]), free(p_heredoc));
 		}
@@ -102,7 +102,7 @@ void	first_process(char *argv[], int m_pipe[2], char *envp[])
 
 	pid = fork();
 	if (pid == -1)
-		exit(0);
+		exit(1);
 	if (pid == 0)
 	{
 		close(m_pipe[READ]);
