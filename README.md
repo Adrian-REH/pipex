@@ -1,6 +1,5 @@
-A continuación te dejo un ejemplo de README para tu proyecto `pipex`.
 
-```markdown
+
 # pipex
 
 ## Descripción
