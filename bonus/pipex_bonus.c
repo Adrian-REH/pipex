@@ -12,10 +12,10 @@
 
 #include "pipex_bonus.h"
 
-pid_t	here_doc(char *limiter, int *m_pipe)
+pid_t here_doc(char *limiter, int *m_pipe)
 {
-	pid_t	pid;
-	char	*p_heredoc;
+	pid_t pid;
+	char *p_heredoc;
 
 	pid = fork();
 	if (pid == -1)
@@ -40,10 +40,10 @@ pid_t	here_doc(char *limiter, int *m_pipe)
 	return (pid);
 }
 
-pid_t	redirect_and_exec(int m_fd[2], char *line, char **env)
+pid_t redirect_and_exec(int m_fd[2], char *line, char **env)
 {
-	int		p_fd[2];
-	pid_t	pid;
+	int p_fd[2];
+	pid_t pid;
 
 	if (pipe(p_fd) == -1)
 		ft_print_error("pipe", 1, "");
@@ -52,36 +52,38 @@ pid_t	redirect_and_exec(int m_fd[2], char *line, char **env)
 		ft_print_error("fork", 1, "");
 	else if (pid == 0)
 	{
-		dup2(m_fd[READ], STDIN_FILENO);
-		dup2(p_fd[WRITE], STDOUT_FILENO);
-		close(p_fd[WRITE]);
-		close(p_fd[READ]);
-		close(m_fd[WRITE]);
-		close(m_fd[READ]);
+		if (dup2(m_fd[READ], STDIN_FILENO) == -1)
+		{
+			(close(p_fd[WRITE]), close(p_fd[READ]));
+			(close(p_fd[1]), close(p_fd[0]), ft_print_error("dup2", 1, ""));
+		}
+		(close(m_fd[WRITE]), close(m_fd[READ]));
+		if (dup2(p_fd[WRITE], STDOUT_FILENO))
+			(close(p_fd[1]), close(p_fd[0]), ft_print_error("dup2", 1, ""));
+		(close(p_fd[WRITE]), close(p_fd[READ]));
 		if (exec_cmd(line, env) == -1)
 			(ft_print_error("command not found: ", 127, line));
 	}
-	close(m_fd[READ]);
-	close(p_fd[WRITE]);
+	(close(m_fd[READ]), close(p_fd[WRITE]));
 	m_fd[READ] = p_fd[READ];
 	return (pid);
 }
 
-void	finaly_process(int *m_fd, char **av, int argc, char **env)
+void finaly_process(int *m_fd, char **av, int argc, char **env)
 {
-	pid_t	pid;
-	int		fd_out;
-	int		status;
+	pid_t pid;
+	int fd_out;
+	int status;
 
-	pid = (fork());
+	pid = fork();
 	if (pid == -1)
 		ft_print_error("fork", 1, "");
 	else if (pid == 0)
 	{
 		fd_out = finaly_openfile(av, argc);
-		(dup2(fd_out, 1), close(fd_out), close(m_fd[1]));
+		(dup2(fd_out, WRITE), close(fd_out), close(m_fd[WRITE]));
 		if (fd_out == -1)
-			exit(1);
+			(close(m_fd[READ]), exit(1));
 		(dup2(m_fd[READ], STDIN_FILENO), close(m_fd[READ]));
 		if (exec_cmd(av[argc - 2], env) == -1)
 			(ft_print_error("command not found: ", 127, av[argc - 2]));
@@ -95,34 +97,33 @@ void	finaly_process(int *m_fd, char **av, int argc, char **env)
 	}
 }
 
-void	first_process(char *argv[], int m_pipe[2], char *envp[])
+void first_process(char *argv[], int m_pipe[2], char *envp[])
 {
-	int	infile;
-	int	pid;
+	int infile;
+	int pid;
 
 	pid = fork();
 	if (pid == -1)
 		exit(1);
 	if (pid == 0)
 	{
-		close(m_pipe[READ]);
 		infile = open_file(argv[1], STDIN_FILENO);
 		if (infile == -1)
-			(close(m_pipe[WRITE]), exit(1));
+			(close(m_pipe[READ]), close(m_pipe[WRITE]), exit(1));
 		if (dup2(infile, STDIN_FILENO) == -1)
-			(close(infile), ft_print_error("pipe", 0, ""));
+			(close(infile), ft_print_error("pipe", 1, ""));
 		if (dup2(m_pipe[WRITE], STDOUT_FILENO) == -1)
-			(close(infile), close(m_pipe[1]), ft_print_error("pipe", 0, ""));
+			(close(infile), close(m_pipe[1]), ft_print_error("pipe", 1, ""));
 		(close(infile), close(m_pipe[WRITE]));
 		if (exec_cmd(argv[2], envp) == -1)
 			(ft_print_error("command not found: ", 127, argv[2]));
 	}
 }
 
-int	main(int argc, char **av, char **env)
+int main(int argc, char **av, char **env)
 {
-	int		i;
-	int		m_pipe[2];
+	int i;
+	int m_pipe[2];
 
 	if (pipe(m_pipe) == -1)
 		ft_print_error("pipe", 0, "");
