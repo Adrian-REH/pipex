@@ -12,10 +12,10 @@
 
 #include "pipex.h"
 
-static int	do_exec(char *line, char **env)
+static int do_exec(char *line, char **env)
 {
-	char	*cmd;
-	char	**command;
+	char *cmd;
+	char **command;
 
 	command = ft_split(line, ' ');
 	if (!command)
@@ -35,10 +35,10 @@ static int	do_exec(char *line, char **env)
 	return (0);
 }
 
-static int	first_exec(char **av, int *p_fd, char **env)
+static int first_exec(char **av, int *p_fd, char **env)
 {
-	int		fd;
-	pid_t	pid;
+	int fd;
+	pid_t pid;
 
 	pid = fork();
 	if (pid == -1)
@@ -48,9 +48,9 @@ static int	first_exec(char **av, int *p_fd, char **env)
 		close(p_fd[READ]);
 		fd = open_file(av[1], STDIN_FILENO);
 		if (dup2(fd, STDIN_FILENO) == -1)
-			(close(fd), exit(1));
+			(close(fd), ft_print_error("dup2", 1, NULL));
 		if (dup2(p_fd[WRITE], STDOUT_FILENO) == -1)
-			return (perror("dup2"), close(fd), close(p_fd[READ]), -1);
+			(close(fd), close(p_fd[READ]), ft_print_error("dup2", 1, NULL));
 		close(p_fd[WRITE]);
 		close(fd);
 		if (do_exec(av[2], env) == -1)
@@ -59,10 +59,10 @@ static int	first_exec(char **av, int *p_fd, char **env)
 	return (pid);
 }
 
-static pid_t	second_exec(char **av, int *p_fd, char **env)
+static pid_t second_exec(char **av, int *p_fd, char **env)
 {
-	int		fd;
-	pid_t	pid;
+	int fd;
+	pid_t pid;
 
 	pid = fork();
 	if (pid == -1)
@@ -71,10 +71,10 @@ static pid_t	second_exec(char **av, int *p_fd, char **env)
 	{
 		close(p_fd[WRITE]);
 		fd = open_file(av[4], STDOUT_FILENO);
-		if (dup2(fd, 1) == -1)
-			(close(fd), exit(1));
+		if (dup2(fd, STDOUT_FILENO) == -1)
+			(close(fd), ft_print_error("dup2", 1, NULL));
 		if (dup2(p_fd[READ], STDIN_FILENO) == -1)
-			return (perror("dup2"), close(fd), close(p_fd[READ]), -1);
+			(close(fd), close(p_fd[READ]), ft_print_error("dup2", 1, NULL));
 		close(p_fd[READ]);
 		close(fd);
 		if (do_exec(av[3], env) == -1)
@@ -83,11 +83,11 @@ static pid_t	second_exec(char **av, int *p_fd, char **env)
 	return (pid);
 }
 
-int	main(int argc, char **av, char **env)
+int main(int argc, char **av, char **env)
 {
-	int		p_fd[2];
-	int		status;
-	pid_t	pids[2];
+	int p_fd[2];
+	int status;
+	pid_t pids[2];
 
 	if (argc != 5)
 		return (-1);
