@@ -95,15 +95,13 @@ int main(int argc, char **av, char **env)
 		return (perror("pipe"), 1);
 	pids[0] = first_exec(av, p_fd, env);
 	pids[1] = second_exec(av, p_fd, env);
-	close(p_fd[0]);
-	close(p_fd[1]);
+	close(p_fd[READ]);
+	close(p_fd[WRITE]);
 	waitpid(pids[0], &status, 0);
 	if (WEXITSTATUS(status) != 0)
 		exit(WEXITSTATUS(status));
 	waitpid(pids[1], &status, 0);
 	if (WEXITSTATUS(status) != 0)
 		exit(WEXITSTATUS(status));
-	close(p_fd[0]);
-	close(p_fd[1]);
 	return (0);
 }
