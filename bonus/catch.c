@@ -1,34 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strncmp.c                                       :+:      :+:    :+:   */
+/*   catch.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/17 16:43:49 by adherrer          #+#    #+#             */
-/*   Updated: 2024/08/02 19:03:48 by adherrer         ###   ########.fr       */
+/*   Created: 2024/08/02 17:51:42 by adherrer          #+#    #+#             */
+/*   Updated: 2024/08/02 19:16:14 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "pipex_bonus.h"
 
-int	ft_strncmp(const char *s1, const char *s2, size_t n)
+int	catch_exp(int argc)
 {
-	if (n <= 0)
-		return (-1);
-	while (n-- > 0)
+	int	status;
+	int	error;
+
+	error = 0;
+	while (argc-- - 1 > 0)
 	{
-		if (*s1 != *s2++)
-			return (*(unsigned char *)(s1) - *(unsigned char *)(s2 - 1));
-		if (!(*s1++))
-			return (0);
+		waitpid(-1, &status, 0);
+		if (WEXITSTATUS(status) != 0)
+			error = (WEXITSTATUS(status));
 	}
-	return (0);
+	return (error);
 }
-/* int	main()
-{
-	char	s1[] = "elias";
-	char	s2[] = "adrian";
-
-	ft_strncmp(s1,s2, 6);
-} */

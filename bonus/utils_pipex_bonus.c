@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/19 07:50:17 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/27 14:09:53 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/02 17:37:48 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,11 +89,15 @@ int	exec_cmd(char *line, char **env)
 	command = ft_split(line, ' ');
 	if (!command)
 		(perror("execve"), exit(127));
-	if (access(command[0], F_OK | X_OK) == 0)
+	if (*command == 0)
+		return (ft_free_p2(command), -1);
+	if (access(command[0], F_OK | X_OK) == 0 && ft_strnstr(command[0], "./", 2))
 	{
 		if (execve(command[0], command, env) == -1)
 			return (ft_free_p2(command), perror("execve"), -1);
 	}
+	else if (access(command[0], F_OK | X_OK) != 0 && ft_strchr(command[0], '/'))
+		return (ft_free_p2(command), -1);
 	else
 	{
 		cmd = get_path(command[0], env);

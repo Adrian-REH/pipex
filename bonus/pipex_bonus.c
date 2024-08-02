@@ -6,16 +6,16 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/29 01:06:19 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/02 19:35:57 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
 
-pid_t here_doc(char *limiter, int *m_pipe)
+pid_t	here_doc(char *limiter, int *m_pipe)
 {
-	pid_t pid;
-	char *p_heredoc;
+	pid_t	pid;
+	char	*p_heredoc;
 
 	pid = fork();
 	if (pid == -1)
@@ -26,24 +26,22 @@ pid_t here_doc(char *limiter, int *m_pipe)
 		while (1)
 		{
 			p_heredoc = get_next_line(0);
-			if (ft_strncmp(p_heredoc, limiter, ft_strlen(p_heredoc) - 1) == 0)
+			if (ft_strcmp(limiter, p_heredoc) == 0)
 			{
-				free(p_heredoc);
-				close(m_pipe[WRITE]);
-				exit(1);
+				(free(p_heredoc), close(m_pipe[WRITE]), exit(0));
 			}
-			(ft_putstr_fd(p_heredoc, m_pipe[1]), free(p_heredoc));
+			(ft_putstr_fd(p_heredoc, m_pipe[WRITE]), free(p_heredoc));
 		}
 	}
 	else
-		(waitpid(-1, NULL, 0), close(m_pipe[WRITE]));
+		(waitpid(-1, NULL, 0));
 	return (pid);
 }
 
-pid_t redirect_and_exec(int m_fd[2], char *line, char **env)
+pid_t	redirect_and_exec(int m_fd[2], char *line, char **env)
 {
-	int p_fd[2];
-	pid_t pid;
+	int		p_fd[2];
+	pid_t	pid;
 
 	if (pipe(p_fd) == -1)
 		ft_print_error("pipe", 1, "");
@@ -58,7 +56,7 @@ pid_t redirect_and_exec(int m_fd[2], char *line, char **env)
 			(close(p_fd[1]), close(p_fd[0]), ft_print_error("dup2", 1, ""));
 		}
 		(close(m_fd[WRITE]), close(m_fd[READ]));
-		if (dup2(p_fd[WRITE], STDOUT_FILENO))
+		if (dup2(p_fd[WRITE], STDOUT_FILENO) == -1)
 			(close(p_fd[1]), close(p_fd[0]), ft_print_error("dup2", 1, ""));
 		(close(p_fd[WRITE]), close(p_fd[READ]));
 		if (exec_cmd(line, env) == -1)
@@ -69,11 +67,10 @@ pid_t redirect_and_exec(int m_fd[2], char *line, char **env)
 	return (pid);
 }
 
-void finaly_process(int *m_fd, char **av, int argc, char **env)
+int	finaly_process(int *m_fd, char **av, int argc, char **env)
 {
-	pid_t pid;
-	int fd_out;
-	int status;
+	pid_t	pid;
+	int		fd_out;
 
 	pid = fork();
 	if (pid == -1)
@@ -89,18 +86,13 @@ void finaly_process(int *m_fd, char **av, int argc, char **env)
 			(ft_print_error("command not found: ", 127, av[argc - 2]));
 	}
 	(close(m_fd[READ]), close(m_fd[WRITE]));
-	while (argc-- - 1 > 0)
-	{
-		waitpid(-1, &status, 0);
-		if (WEXITSTATUS(status) == 127)
-			exit(WEXITSTATUS(status));
-	}
+	exit(catch_exp(argc));
 }
 
-void first_process(char *argv[], int m_pipe[2], char *envp[])
+void	first_process(char *argv[], int m_pipe[2], char *envp[])
 {
-	int infile;
-	int pid;
+	int	infile;
+	int	pid;
 
 	pid = fork();
 	if (pid == -1)
@@ -120,10 +112,11 @@ void first_process(char *argv[], int m_pipe[2], char *envp[])
 	}
 }
 
-int main(int argc, char **av, char **env)
+int	main(int argc, char **av, char **env)
 {
-	int i;
-	int m_pipe[2];
+	int		i;
+	char	*str;
+	int		m_pipe[2];
 
 	if (pipe(m_pipe) == -1)
 		ft_print_error("pipe", 0, "");
@@ -134,13 +127,13 @@ int main(int argc, char **av, char **env)
 	{
 		if (argc < 6)
 			(ft_print_error("Pocos argumentos", 0, ""));
-		here_doc(av[2], m_pipe);
+		str = ft_strjoin(av[2], "\n");
+		here_doc(str, m_pipe);
+		free(str);
 	}
 	else
 		first_process(av, m_pipe, env);
 	while (i < (argc - 2))
 		i += ((redirect_and_exec(m_pipe, av[i], env)), 1);
 	finaly_process(m_pipe, av, argc, env);
-	close(m_pipe[0]);
-	close(m_pipe[1]);
 }

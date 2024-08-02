@@ -6,25 +6,29 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/29 00:54:21 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/02 19:38:26 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-static int do_exec(char *line, char **env)
+static int	do_exec(char *line, char **env)
 {
-	char *cmd;
-	char **command;
+	char	*cmd;
+	char	**command;
 
 	command = ft_split(line, ' ');
 	if (!command)
 		(perror("Memory error: "));
-	if (access(command[0], F_OK | X_OK) == 0)
+	if (*command == 0)
+		return (ft_free_p2(command), -1);
+	if (access(command[0], F_OK | X_OK) == 0 && ft_strnstr(command[0], "./", 2))
 	{
 		if (execve(command[0], command, env) == -1)
 			return (ft_free_p2(command), -1);
 	}
+	else if (access(command[0], F_OK | X_OK) != 0 && ft_strchr(command[0], '/'))
+		return (ft_free_p2(command), -1);
 	else
 	{
 		cmd = get_path(command[0], env);
@@ -35,10 +39,10 @@ static int do_exec(char *line, char **env)
 	return (0);
 }
 
-static int first_exec(char **av, int *p_fd, char **env)
+static int	first_exec(char **av, int *p_fd, char **env)
 {
-	int fd;
-	pid_t pid;
+	int		fd;
+	pid_t	pid;
 
 	pid = fork();
 	if (pid == -1)
@@ -59,10 +63,10 @@ static int first_exec(char **av, int *p_fd, char **env)
 	return (pid);
 }
 
-static pid_t second_exec(char **av, int *p_fd, char **env)
+static pid_t	second_exec(char **av, int *p_fd, char **env)
 {
-	int fd;
-	pid_t pid;
+	int		fd;
+	pid_t	pid;
 
 	pid = fork();
 	if (pid == -1)
@@ -83,25 +87,28 @@ static pid_t second_exec(char **av, int *p_fd, char **env)
 	return (pid);
 }
 
-int main(int argc, char **av, char **env)
+int	main(int argc, char **av, char **env)
 {
-	int p_fd[2];
-	int status;
-	pid_t pids[2];
+	int		p_fd[2];
+	int		status;
+	int		error;
+	pid_t	pids[2];
 
 	if (argc != 5)
-		return (-1);
+		return (write(2, "Error Arg", ft_strlen("Error Arg")), 1);
 	if (pipe(p_fd) == -1)
-		return (perror("pipe"), 1);
+		return (write(2, "Pipe", ft_strlen("Psipe")), 1);
+	error = 0;
 	pids[0] = first_exec(av, p_fd, env);
 	pids[1] = second_exec(av, p_fd, env);
 	close(p_fd[READ]);
 	close(p_fd[WRITE]);
 	waitpid(pids[0], &status, 0);
 	if (WEXITSTATUS(status) != 0)
-		exit(WEXITSTATUS(status));
+		error = (WEXITSTATUS(status));
 	waitpid(pids[1], &status, 0);
 	if (WEXITSTATUS(status) != 0)
-		exit(WEXITSTATUS(status));
+		error = (WEXITSTATUS(status));
+	exit(error);
 	return (0);
 }
