@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/27 16:40:38 by adherrer          #+#    #+#             */
-/*   Updated: 2024/07/29 00:08:56 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/04 20:02:21 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,9 @@
 void	ft_print_error(char *title, int code, char *line)
 {
 	char	*str;
-	int		i;
 	char	*cmd;
 
-	i = ft_strchr(line, ' ') - line;
-	cmd = ft_substr(line, 0, i);
+	cmd = ft_strtrim(line, " ");
 	str = ft_strjoin(title, cmd);
 	if (!str)
 		exit(1);
