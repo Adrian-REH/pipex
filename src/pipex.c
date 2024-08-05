@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/08/02 19:38:26 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/05 17:06:02 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ static int	do_exec(char *line, char **env)
 		(perror("Memory error: "));
 	if (*command == 0)
 		return (ft_free_p2(command), -1);
-	if (access(command[0], F_OK | X_OK) == 0 && ft_strnstr(command[0], "./", 2))
+	if ((access(command[0], F_OK | X_OK) == 0) \
+	&& ft_strnstr(command[0], "./", 2))
 	{
 		if (execve(command[0], command, env) == -1)
 			return (ft_free_p2(command), -1);
@@ -91,24 +92,18 @@ int	main(int argc, char **av, char **env)
 {
 	int		p_fd[2];
 	int		status;
-	int		error;
 	pid_t	pids[2];
 
 	if (argc != 5)
 		return (write(2, "Error Arg", ft_strlen("Error Arg")), 1);
 	if (pipe(p_fd) == -1)
 		return (write(2, "Pipe", ft_strlen("Psipe")), 1);
-	error = 0;
 	pids[0] = first_exec(av, p_fd, env);
 	pids[1] = second_exec(av, p_fd, env);
 	close(p_fd[READ]);
 	close(p_fd[WRITE]);
 	waitpid(pids[0], &status, 0);
-	if (WEXITSTATUS(status) != 0)
-		error = (WEXITSTATUS(status));
 	waitpid(pids[1], &status, 0);
-	if (WEXITSTATUS(status) != 0)
-		error = (WEXITSTATUS(status));
-	exit(error);
+	exit(WEXITSTATUS(status));
 	return (0);
 }

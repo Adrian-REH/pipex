@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/19 07:50:17 by adherrer          #+#    #+#             */
-/*   Updated: 2024/08/02 17:37:48 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/04 20:03:43 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ int	exec_cmd(char *line, char **env)
 
 	command = ft_split(line, ' ');
 	if (!command)
-		(perror("execve"), exit(127));
+		(perror("Memory error"), exit(127));
 	if (*command == 0)
 		return (ft_free_p2(command), -1);
 	if (access(command[0], F_OK | X_OK) == 0 && ft_strnstr(command[0], "./", 2))

@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/18 20:45:27 by adherrer          #+#    #+#             */
-/*   Updated: 2024/08/02 19:35:57 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/05 17:03:46 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ pid_t	here_doc(char *limiter, int *m_pipe)
 		}
 	}
 	else
-		(waitpid(-1, NULL, 0));
+		waitpid(pid, NULL, 0);
 	return (pid);
 }
 
@@ -67,7 +67,7 @@ pid_t	redirect_and_exec(int m_fd[2], char *line, char **env)
 	return (pid);
 }
 
-int	finaly_process(int *m_fd, char **av, int argc, char **env)
+pid_t	finaly_process(int *m_fd, char **av, int argc, char **env)
 {
 	pid_t	pid;
 	int		fd_out;
@@ -86,10 +86,10 @@ int	finaly_process(int *m_fd, char **av, int argc, char **env)
 			(ft_print_error("command not found: ", 127, av[argc - 2]));
 	}
 	(close(m_fd[READ]), close(m_fd[WRITE]));
-	exit(catch_exp(argc));
+	return (pid);
 }
 
-void	first_process(char *argv[], int m_pipe[2], char *envp[])
+pid_t	first_process(char *argv[], int m_pipe[2], char *envp[])
 {
 	int	infile;
 	int	pid;
@@ -110,14 +110,17 @@ void	first_process(char *argv[], int m_pipe[2], char *envp[])
 		if (exec_cmd(argv[2], envp) == -1)
 			(ft_print_error("command not found: ", 127, argv[2]));
 	}
+	return (pid);
 }
 
 int	main(int argc, char **av, char **env)
 {
 	int		i;
+	pid_t	*pids;
 	char	*str;
 	int		m_pipe[2];
 
+	pids = malloc(sizeof(pid_t) * (argc - 1));
 	if (pipe(m_pipe) == -1)
 		ft_print_error("pipe", 0, "");
 	if (argc < 5)
@@ -132,8 +135,9 @@ int	main(int argc, char **av, char **env)
 		free(str);
 	}
 	else
-		first_process(av, m_pipe, env);
+		pids[0] = first_process(av, m_pipe, env);
 	while (i < (argc - 2))
-		i += ((redirect_and_exec(m_pipe, av[i], env)), 1);
-	finaly_process(m_pipe, av, argc, env);
+		i += ((pids[i - 2] = redirect_and_exec(m_pipe, av[i], env)), 1);
+	pids[i - 2] = finaly_process(m_pipe, av, argc, env);
+	exit(catch_exp(argc, pids));
 }

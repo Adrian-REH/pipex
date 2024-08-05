@@ -6,7 +6,7 @@
 /*   By: adherrer <adherrer@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/19 07:49:49 by adherrer          #+#    #+#             */
-/*   Updated: 2024/08/02 17:53:41 by adherrer         ###   ########.fr       */
+/*   Updated: 2024/08/02 20:38:02 by adherrer         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define READ 0
 # define WRITE 1
 
-int		catch_exp(int argc);
+int		catch_exp(int argc, pid_t *pids);
 char	*find_str(char *str, char **env);
 int		open_file(char *file, int b_in);
 void	ft_free_p2(char **p2);
